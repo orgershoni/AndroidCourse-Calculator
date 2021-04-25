@@ -89,5 +89,128 @@ public class AppFlowTest {
     assertEquals("11", textViewOutput.getText().toString());
   }
 
-  // TODO: add at last 10 more flow tests
+  @Test
+  public void flowTest3(){
+    // run clicks on "333+111="
+    for (View button: Arrays.asList(
+            button3, button3, button3, buttonPlus, button1, button1, button1, buttonEquals
+    )) {
+      button.performClick();
+    }
+
+    assertEquals("444", textViewOutput.getText().toString());
+  }
+
+  @Test
+  public void flowTest4(){
+    // run clicks on "7+5<backspace>4==" double click on =
+    for (View button: Arrays.asList(
+            button3, button3, button3, buttonPlus, button1, button1, button1,
+            buttonEquals, buttonEquals
+    )) {
+      button.performClick();
+    }
+
+    assertEquals("444", textViewOutput.getText().toString());
+  }
+
+  @Test
+  public void flowTest5(){
+    // run clicks on "7+-5<backspace>4="    should ignore minus after plus
+    for (View button: Arrays.asList(
+            button7, buttonPlus, buttonMinus, button5, buttonBackspace, button4, buttonEquals
+    )) {
+      button.performClick();
+    }
+
+    assertEquals("11", textViewOutput.getText().toString());
+  }
+
+  @Test
+  public void flowTest6(){
+    // run clicks on "7+4=+9=-20="     equals is middle of expression
+    for (View button: Arrays.asList(
+            button7, buttonPlus, button4, buttonEquals, buttonPlus, button9, buttonEquals,
+            buttonMinus, button2, button0, buttonEquals
+    )) {
+      button.performClick();
+    }
+
+    assertEquals("0", textViewOutput.getText().toString());
+  }
+
+  @Test
+  public void flowTest7(){
+    // run clicks on "<backspace>"   backspace on empty input does nothing
+    for (View button: Arrays.asList(
+            buttonBackspace
+    )) {
+      button.performClick();
+    }
+
+    assertEquals("0", textViewOutput.getText().toString());
+  }
+
+  @Test
+  public void flowTest8(){
+    // run clicks on "5<backspace>"     backspace on single digit input - return to no input mode
+    for (View button: Arrays.asList(
+            button5, buttonBackspace
+    )) {
+      button.performClick();
+    }
+
+    assertEquals("0", textViewOutput.getText().toString());
+  }
+
+  @Test
+  public void flowTest9(){
+    // run clicks on "7+5<backspace>4=<clear>88+2="
+    for (View button: Arrays.asList(
+            button7, buttonPlus, button5, buttonBackspace, button4, buttonEquals, buttonClear,
+            button8, button8, buttonPlus, button2, buttonEquals
+    )) {
+      button.performClick();
+    }
+
+    assertEquals("90", textViewOutput.getText().toString());
+  }
+
+  @Test
+  public void flowTest10(){
+    // run clicks on "<clear>"    clear as first input
+    for (View button: Arrays.asList(
+            buttonClear
+    )) {
+      button.performClick();
+    }
+
+    assertEquals("0", textViewOutput.getText().toString());
+  }
+
+  @Test
+  public void flowTest11(){
+    // run clicks on "-7+5<backspace>4="      order minus as first input
+    for (View button: Arrays.asList(
+            buttonMinus, button6, buttonPlus, button5, buttonBackspace, button4, buttonEquals
+    )) {
+      button.performClick();
+    }
+
+    assertEquals("-2", textViewOutput.getText().toString());
+  }
+
+  @Test
+  public void flowTest12() {
+    // run clicks on "-7+5<backspace>4=+5="      order minus as first input and equals in middle
+    for (View button : Arrays.asList(
+            buttonMinus, button7, buttonPlus, button5, buttonBackspace, button4, buttonEquals,
+            buttonPlus, button5, buttonEquals
+    )) {
+      button.performClick();
+    }
+
+    assertEquals("2", textViewOutput.getText().toString());
+
+  }
 }
