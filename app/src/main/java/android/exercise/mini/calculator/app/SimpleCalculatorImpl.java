@@ -2,17 +2,20 @@ package android.exercise.mini.calculator.app;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 
 public class SimpleCalculatorImpl implements SimpleCalculator {
 
-  // todo: add fields as needed
-  private static final String PLUS = "+";
-  private static final String MINUS = "-";
+  private static final Character PLUS = '+';
+  private static final Character MINUS = '-';
 
+  private static final Character NO_INPUT = '0';
 
-  ArrayList<String> rawInput;
+  private static final String NUMBER_PATTERN = "\\d+";
+  private static final String LIST_TO_STRING_IRRELEVANT_CHARS = "[,\\s\\[\\]]";
+  private static final String REMOVE = "";
+
+  ArrayList<Character> rawInput;
   ArrayList<String> numbersInput;
   boolean noInputGiven;
 
@@ -23,25 +26,20 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
   @Override
   public String output() {
 
-    String out = "";
-    for (String input : this.rawInput)
-    {
-      out = out.concat(input);
-    }
-
-    return out;
+    return this.rawInput.toString()
+            .replaceAll(LIST_TO_STRING_IRRELEVANT_CHARS, REMOVE);
   }
 
   @Override
   public void insertDigit(int digit) {
 
-    if (isDigit(String.valueOf(digit))) {
+    char asChar = Character.forDigit(digit, 10);
+    if (Character.isDigit(asChar)) {
       if (noInputGiven) {
         this.rawInput.clear();
       }
-      this.rawInput.add(String.valueOf(digit));
+      this.rawInput.add(asChar);
       noInputGiven = false;
-
     }
     else{
       throw new RuntimeException("Calculator expect a digit 0-9");
@@ -50,8 +48,8 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
 
   @Override
   public void insertPlus() {
-    String lastInput = this.rawInput.get(this.rawInput.size() - 1);
-    if (isDigit(lastInput))
+    char lastInput = this.rawInput.get(this.rawInput.size() - 1);
+    if (Character.isDigit(lastInput))
     {
       this.rawInput.add(PLUS);
     }
@@ -60,8 +58,8 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
 
   @Override
   public void insertMinus() {
-    String lastInput = this.rawInput.get(this.rawInput.size() - 1);
-    if (isDigit(lastInput))
+    char lastInput = this.rawInput.get(this.rawInput.size() - 1);
+    if (Character.isDigit(lastInput))
     {
       this.rawInput.add(MINUS);
     }
@@ -70,23 +68,16 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
 
   @Override
   public void insertEquals() {
-    // todo: calculate the equation. after calling `insertEquals()`, the output should be the result
-    //  e.g. given input "14+3", calling `insertEquals()`, and calling `output()`, output should be "17"
 
     UnifyDigits();
     String result = calculateInput();
     clearHelper(false);
 
-    this.rawInput = new ArrayList<>(Arrays.asList(result.split("")));
+    this.rawInput = toChrList(result);
   }
 
   @Override
   public void deleteLast() {
-    // todo: delete the last input (digit, plus or minus)
-    //  e.g.
-    //  if input was "12+3" and called `deleteLast()`, then delete the "3"
-    //  if input was "12+" and called `deleteLast()`, then delete the "+"
-    //  if no input was given, then there is nothing to do here
 
     if (noInputGiven){
       return;
@@ -107,7 +98,6 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
 
     clearHelper(true);
 
-    // todo: clear everything (same as no-input was never given)
   }
 
   private void clearHelper(boolean hardReset)
@@ -120,14 +110,13 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
 
     if (hardReset){
       this.noInputGiven = true;
-      this.rawInput.add("0");
+      this.rawInput.add(NO_INPUT);
     }
   }
 
   @Override
   public Serializable saveState() {
     CalculatorState state = new CalculatorState();
-    // todo: insert all data to the state, so in the future we can load from this state
     state.setRawInput(this.rawInput);
     state.setNoInputGiven(this.noInputGiven);
 
@@ -153,19 +142,20 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
 
     while (singleInputIdx < this.rawInput.size()){
 
-      String singleInput = this.rawInput.get(singleInputIdx);
-      if (isDigit(singleInput)){
-        String multiDigit = singleInput;
+      Character singleInput = this.rawInput.get(singleInputIdx);
+      if (Character.isDigit(singleInput)){
+        String multiDigit = singleInput.toString();
         singleInputIdx++;
-        while(singleInputIdx < this.rawInput.size() && isDigit(this.rawInput.get(singleInputIdx)))
+        while(singleInputIdx < this.rawInput.size() &&
+              Character.isDigit(this.rawInput.get(singleInputIdx)))
         {
-          multiDigit = multiDigit.concat(rawInput.get(singleInputIdx));
+          multiDigit = multiDigit.concat(rawInput.get(singleInputIdx).toString());
           singleInputIdx++;
         }
         this.numbersInput.add(multiDigit);
       }
       else{
-        this.numbersInput.add(singleInput);
+        this.numbersInput.add(singleInput.toString());
         singleInputIdx++;
       }
     }
@@ -173,7 +163,7 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
 
   private String calculateInput()
   {
-    String result = "0";
+    String result = NO_INPUT.toString();
     int startExpression = 0;
 
     if (this.numbersInput.size() > 0) {
@@ -193,16 +183,14 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
           System.exit(1);
         }
         result = getOperator(operator).run(result, rhs);
-
       }
     }
-
     return result;
-
   }
 
   private Function2Args<String, String, String> getOperator (String operatorDesc){
-    if (operatorDesc.equals(PLUS)) {
+
+    if (operatorDesc.charAt(0) == PLUS) {
       return (String i1, String i2) -> String.valueOf((Integer.parseInt(i1) + Integer.parseInt(i2)));
     }
     else{
@@ -216,32 +204,30 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
   }
 
   private static boolean isNumber(String input){
-    return input.matches("\\d+");
+    return input.matches(NUMBER_PATTERN);
   }
 
-  private static boolean isDigit(String input){
-    return input.matches("\\b\\d\\b");
+  private static ArrayList<Character> toChrList(String str){
+
+    ArrayList<Character> chrList = new ArrayList<>();
+    for (char chr : str.toCharArray())
+    {
+      chrList.add(chr);
+    }
+    return chrList;
   }
 
 
   private static class CalculatorState implements Serializable {
-    /*
-    TODO: add fields to this class that will store the calculator state
-    all fields must only be from the types:
-    - primitives (e.g. int, boolean, etc)
-    - String
-    - ArrayList<> where the type is a primitive or a String
-    - HashMap<> where the types are primitives or a String
-     */
 
-    ArrayList<String> rawInput;
+    ArrayList<Character> rawInput;
     boolean noInputGiven;
 
-    public void setRawInput(ArrayList<String> rawInput){
+    public void setRawInput(ArrayList<Character> rawInput){
       this.rawInput = new ArrayList<>(rawInput);
     }
 
-    public ArrayList<String> getRawInput(){
+    public ArrayList<Character> getRawInput(){
       return this.rawInput;
     }
 
