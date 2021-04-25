@@ -10,8 +10,8 @@ Q: Saying we want to add a cool feature - button "x" to run multiplication.
    What code do we need to change/add/remove to support this feature?
    Which tests can we run on the calculator? On the activity? On the app?
    
-A:  First, the backend logic of calculating the result out of the string  input, meaning the insertEquals() method, 
-    should be changed.
+A:  First, the backend logic of calculating the result out of the string  input, meaning the
+    insertEquals() method, should be changed.
     Right now, the calculation is based on order (since there is no operator priority), and having
     the "x" calculator added we would need to parse the input differently before calculating.
     Furthermore, we would add an insertMultiplication method that can be linked to OnClickListeners

@@ -123,10 +123,12 @@ public class SimpleCalculatorImplTest {
     SimpleCalculatorImpl firstCalculator = new SimpleCalculatorImpl();
     SimpleCalculatorImpl secondCalculator = new SimpleCalculatorImpl();
 
+    // first calc output is 5+7
     firstCalculator.insertDigit(5);
     firstCalculator.insertPlus();
     firstCalculator.insertDigit(7);
 
+    // second calc output is 5+7
     secondCalculator.insertDigit(2);
     secondCalculator.insertPlus();
     secondCalculator.insertDigit(3);
@@ -135,7 +137,7 @@ public class SimpleCalculatorImplTest {
     Serializable savedState = firstCalculator.saveState();
     assertNotNull(savedState);
 
-    // load state to second calculator
+    // load state to second calculator (out should be 5+7)
     secondCalculator.loadState(savedState);
 
     assertEquals("5+7", secondCalculator.output());
@@ -185,6 +187,7 @@ public class SimpleCalculatorImplTest {
   public void basic_equality(){
     SimpleCalculatorImpl calculatorUnderTest = new SimpleCalculatorImpl();
 
+    // "5+7="
     calculatorUnderTest.insertDigit(5);
     calculatorUnderTest.insertPlus();
     calculatorUnderTest.insertDigit(7);
@@ -197,6 +200,8 @@ public class SimpleCalculatorImplTest {
   @Test
   public void multiDigit_equality(){
     SimpleCalculatorImpl calculatorUnderTest = new SimpleCalculatorImpl();
+
+    // "33+55="
 
     calculatorUnderTest.insertDigit(3);
     calculatorUnderTest.insertDigit(3);
@@ -213,6 +218,7 @@ public class SimpleCalculatorImplTest {
   public void whenLastInputBeforeEqualsIsOrder_should_Ignore(){
     SimpleCalculatorImpl calculatorUnderTest = new SimpleCalculatorImpl();
 
+    // "5+7-="
     calculatorUnderTest.insertDigit(5);
     calculatorUnderTest.insertPlus();
     calculatorUnderTest.insertDigit(7);
@@ -227,6 +233,7 @@ public class SimpleCalculatorImplTest {
   public void whenFirstInputIsMinus_should_calculateCorrectly(){
     SimpleCalculatorImpl calculatorUnderTest = new SimpleCalculatorImpl();
 
+    // "-5+7="
     calculatorUnderTest.insertMinus();
     calculatorUnderTest.insertDigit(5);
     calculatorUnderTest.insertPlus();
@@ -241,6 +248,7 @@ public class SimpleCalculatorImplTest {
   public void whenFirstInputIsPlus_should_calculateCorrectly(){
     SimpleCalculatorImpl calculatorUnderTest = new SimpleCalculatorImpl();
 
+    // "+5+7="
     calculatorUnderTest.insertPlus();
     calculatorUnderTest.insertDigit(5);
     calculatorUnderTest.insertPlus();
@@ -256,6 +264,7 @@ public class SimpleCalculatorImplTest {
 
     SimpleCalculatorImpl calculatorUnderTest = new SimpleCalculatorImpl();
 
+    // "8-7=+4=-1="
     calculatorUnderTest.insertDigit(8);
     calculatorUnderTest.insertMinus();
     calculatorUnderTest.insertDigit(7);
@@ -276,6 +285,7 @@ public class SimpleCalculatorImplTest {
 
     SimpleCalculatorImpl calculatorUnderTest = new SimpleCalculatorImpl();
 
+    //"999-888-222=-333"
     calculatorUnderTest.insertDigit(9);
     calculatorUnderTest.insertDigit(9);
     calculatorUnderTest.insertDigit(9);
@@ -302,6 +312,7 @@ public class SimpleCalculatorImplTest {
 
     SimpleCalculatorImpl calculatorUnderTest = new SimpleCalculatorImpl();
 
+    //"999-888-222=-333="
     calculatorUnderTest.insertDigit(9);
     calculatorUnderTest.insertDigit(9);
     calculatorUnderTest.insertDigit(9);
@@ -343,21 +354,4 @@ public class SimpleCalculatorImplTest {
     assertEquals("1", calculatorUnderTest.output());
 
   }
-
-
-  // TODO:
-  //  the existing tests are not enough since they only test simple use-cases with small inputs.
-  //  write at least 10 methods to test correct behavior with complicated inputs or use-cases.
-  //  examples:
-  //  - given input "5+7-13<DeleteLast>25", expected output is "5+17-125"
-  //  - given input "9<Clear>12<Clear>8-7=", expected output is "1"
-  //  - given input "8-7=+4=-1=", expected output is "4"
-  //  - given input "999-888-222=-333", expected output is "-111-333"
-  //  - with 2 calculators, give them different inputs, then save state on first calculator and load the state into second calculator, make sure state loaded well
-  //  etc etc.
-  //  feel free to be creative in your tests!
-
-
-
-
 }
