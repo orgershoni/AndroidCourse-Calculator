@@ -34,9 +34,10 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
   public void insertDigit(int digit) {
 
     char asChar = Character.forDigit(digit, 10);
-    if (Character.isDigit(asChar)) {
+
+      if (Character.isDigit(asChar)) {      // checks the digit is indeed digit
       if (noInputGiven) {
-        this.rawInput.clear();
+        this.rawInput.clear();      // clear the 0 ("No input") from the screen
       }
       this.rawInput.add(asChar);
       noInputGiven = false;
@@ -49,7 +50,7 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
   @Override
   public void insertPlus() {
     char lastInput = this.rawInput.get(this.rawInput.size() - 1);
-    if (Character.isDigit(lastInput))
+    if (Character.isDigit(lastInput))   // Avoiding insert order after order
     {
       this.rawInput.add(PLUS);
     }
@@ -59,7 +60,7 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
   @Override
   public void insertMinus() {
     char lastInput = this.rawInput.get(this.rawInput.size() - 1);
-    if (Character.isDigit(lastInput))
+    if (Character.isDigit(lastInput))   // Avoiding insert order after order
     {
       this.rawInput.add(MINUS);
     }
@@ -69,10 +70,14 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
   @Override
   public void insertEquals() {
 
-    UnifyDigits();
+    // Calculate result
+    unifyDigits();
     String result = calculateInput();
+
+    // Clear calculating history
     clearHelper(false);
 
+    // Put result as the only item in history
     this.rawInput = toChrList(result);
   }
 
@@ -84,8 +89,10 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
     }
 
     if (this.rawInput.size() > 0){
-
+      // Removing last input
       this.rawInput.remove(this.rawInput.size() - 1);
+
+      // If this removal empties all input - clear calculator
       if (this.rawInput.size() == 0)
       {
         clear();
@@ -100,6 +107,11 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
 
   }
 
+  /**
+   * Resets calculator attributes. if hardReset, the noInput flag is turned on and
+   * raw input is updated accordingly.
+   * @param hardReset
+   */
   private void clearHelper(boolean hardReset)
   {
     this.rawInput = new ArrayList<>();
@@ -134,8 +146,14 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
 
   }
 
-
-  private void UnifyDigits()
+  /***
+   * Converts rawInput from a list of chars to a list of strings.
+   * For example ['3', '5', '-', '2'] -> ["35", "+", "2"]
+   * This will result in a list of string that it's structure is numbers/orders intermittently.
+   * Meaning number-order-number..... / order-number-order....
+   * This structure will be used in CalculateInput method
+   */
+  private void unifyDigits()
   {
     this.numbersInput = new ArrayList<>();
     int singleInputIdx = 0;
@@ -161,11 +179,19 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
     }
   }
 
+  /***
+   * Calculating input using numbersInput String List.
+   * We assume that in this list, the numbers and orders are appearing intermittently.
+   * Meaning number-order-number.... / order-number-order....
+   *
+   * @return String represent to result of the mathematical expression
+   */
   private String calculateInput()
   {
     String result = NO_INPUT.toString();
     int startExpression = 0;
 
+    // Aligning input to start with an order
     if (this.numbersInput.size() > 0) {
       String firstInput = this.numbersInput.get(0);
       if (isNumber(firstInput)) {
@@ -173,21 +199,31 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
         startExpression++;
       }
 
+      // Going over input is pairs of (order, number), and applying the order on the number and
+      // the accumulated result
       for (int inputIdx = startExpression; inputIdx < this.numbersInput.size() - 1; inputIdx += 2) {
         String operator = this.numbersInput.get(inputIdx);
         String rhs = this.numbersInput.get(inputIdx + 1);
 
+        // This code should not be accessed if program flow is correct
         if (assertInputType(operator, false) ||
                 assertInputType(rhs, true)) {
           System.err.println("Error in your code !");
           System.exit(1);
         }
-        result = getOperator(operator).run(result, rhs);
+
+        result = getOperator(operator).apply(result, rhs);
       }
     }
     return result;
   }
 
+  /***
+   * Given a operator descriptor (PLUS/MINUS) returns a integer addition / subtraction function
+   * that are represented using strings
+   * @param operatorDesc
+   * @return
+   */
   private Function2Args<String, String, String> getOperator (String operatorDesc){
 
     if (operatorDesc.charAt(0) == PLUS) {
@@ -199,14 +235,32 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
 
   }
 
-  private static boolean assertInputType(String input, boolean expectsDigit){
-    return (expectsDigit) != isNumber(input);
+  /***
+   * Validating input type. We assume that input is a string representing an operator (+/-) or
+   * a number. Function return true if input as expected (referring to expectsNumber variable),
+   * false, otherwise
+   * @param input
+   * @param expectsNumber
+   * @return
+   */
+  private static boolean assertInputType(String input, boolean expectsNumber){
+    return (expectsNumber) != isNumber(input);
   }
 
+  /***
+   * Returns True if given string represents a number
+   * @param input - string
+   * @return
+   */
   private static boolean isNumber(String input){
     return input.matches(NUMBER_PATTERN);
   }
 
+  /***
+   * Converts a string to ArrayList of Characters
+   * @param str - string to convert
+   * @return array list of characters
+   */
   private static ArrayList<Character> toChrList(String str){
 
     ArrayList<Character> chrList = new ArrayList<>();
@@ -244,7 +298,7 @@ public class SimpleCalculatorImpl implements SimpleCalculator {
   @FunctionalInterface
   public interface Function2Args<T1, T2, R> {
 
-    R run(T1 t1, T2 t2);
+    R apply(T1 t1, T2 t2);
 
   }
 
